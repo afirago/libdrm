@@ -21,10 +21,15 @@
 # IN THE SOFTWARE.
 #
 
+# Two identical libs are defined here.
+# libdrm: for vendors. installed to /vendor/lib. libdrm_<vendor> uses this.
+# libdrm_platform: for platform modules (such as libminui). installed to /system/lib
+
 LIBDRM_COMMON_MK := $(call my-dir)/Android.common.mk
 
 LOCAL_PATH := $(call my-dir)
 LIBDRM_TOP := $(LOCAL_PATH)
+
 
 include $(CLEAR_VARS)
 
@@ -33,7 +38,7 @@ include $(LOCAL_PATH)/Makefile.sources
 
 #static library for the device (recovery)
 include $(CLEAR_VARS)
-LOCAL_MODULE := libdrm
+LOCAL_MODULE := libdrm_platform
 
 LOCAL_SRC_FILES := $(LIBDRM_FILES)
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
@@ -49,7 +54,44 @@ include $(BUILD_STATIC_LIBRARY)
 
 # Shared library for the device
 include $(CLEAR_VARS)
+LOCAL_MODULE := libdrm_platform
+
+LOCAL_SRC_FILES := $(LIBDRM_FILES)
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+	$(LOCAL_PATH) \
+	$(LOCAL_PATH)/include/drm \
+	$(LOCAL_PATH)/android
+
+LOCAL_SHARED_LIBRARIES := \
+	libcutils
+
+LOCAL_C_INCLUDES := \
+        $(LOCAL_PATH)/include/drm
+
+include $(LIBDRM_COMMON_MK)
+include $(BUILD_SHARED_LIBRARY)
+
+#static library for vendor
+include $(CLEAR_VARS)
 LOCAL_MODULE := libdrm
+LOCAL_VENDOR_MODULE := true
+
+LOCAL_SRC_FILES := $(LIBDRM_FILES)
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+	$(LOCAL_PATH) \
+	$(LOCAL_PATH)/include/drm \
+	$(LOCAL_PATH)/android
+
+LOCAL_C_INCLUDES := \
+	$(LOCAL_PATH)/include/drm
+
+include $(LIBDRM_COMMON_MK)
+include $(BUILD_STATIC_LIBRARY)
+
+# Shared library for vendor
+include $(CLEAR_VARS)
+LOCAL_MODULE := libdrm
+LOCAL_VENDOR_MODULE := true
 
 LOCAL_SRC_FILES := $(LIBDRM_FILES)
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
